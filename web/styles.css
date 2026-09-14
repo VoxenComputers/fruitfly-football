@@ -1,0 +1,537 @@
+/* Drosophila 11v11 Fly Football Championship Stylesheet */
+
+:root {
+  --bg-pitch: #0a1118;
+  --card-bg: #10151a;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --neon-yellow: #d8ff00;
+  --team-red: #ff3344;
+  --team-blue: #0088ff;
+  --text-main: #ffffff;
+  --text-muted: #7e8b9b;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-pitch);
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+#canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Broadcast Match Scoreboard (Top Center) */
+.top-scoreboard {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(14, 20, 28, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 36px;
+  padding: 6px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.team-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.team-badge.red {
+  background: var(--team-red);
+  box-shadow: 0 0 10px rgba(255, 51, 68, 0.5);
+}
+
+.team-badge.blue {
+  background: var(--team-blue);
+  box-shadow: 0 0 10px rgba(0, 136, 255, 0.5);
+}
+
+.team-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f0f4f8;
+}
+
+.team-score {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #ffffff;
+  min-width: 20px;
+  text-align: center;
+}
+
+.match-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-clock {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--neon-yellow);
+}
+
+.match-stage {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+}
+
+/* Camera Controls (Top Right) */
+.top-controls {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cam-btn, .action-btn {
+  background: rgba(14, 20, 28, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #b0c0d0;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cam-btn:hover, .action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.cam-btn.active {
+  background: #ffffff;
+  color: #0c1219;
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.action-btn {
+  background: rgba(255, 51, 68, 0.25);
+  border-color: rgba(255, 51, 68, 0.5);
+  color: #ff8899;
+}
+
+/* Goal Banner */
+.goal-banner {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.goal-banner.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.goal-banner h1 {
+  font-size: 82px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(180deg, #ffffff, var(--neon-yellow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 35px rgba(216, 255, 0, 0.8);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.8));
+}
+
+/* LIVE NEURAL ACTIVITY CARD (Exact match to reference screenshot) */
+.neural-activity-card {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 380px;
+  z-index: 10;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neural-activity-card.minimized {
+  width: auto !important;
+  min-width: 260px !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+.neural-activity-card.minimized .card-header {
+  margin-bottom: 0 !important;
+}
+
+.neural-activity-card.minimized .card-collapsible-body {
+  display: none !important;
+}
+
+.card-header, .hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.minimize-toggle-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.minimize-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.header-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+}
+
+.player-tag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--team-red);
+}
+
+.green-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-yellow);
+  box-shadow: 0 0 8px var(--neon-yellow);
+}
+
+.card-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.stat-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.stat-main {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.stat-num.neon-green {
+  color: var(--neon-yellow);
+}
+
+.stat-num.white {
+  color: #ffffff;
+}
+
+.stat-unit {
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+.stat-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.waveform-wrap {
+  width: 100%;
+  height: 42px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+}
+
+#waveform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.action-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.act-lbl {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+}
+
+.act-val {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--neon-yellow);
+}
+
+/* Roster Selection Bar (Bottom Left) */
+.roster-bar {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 10;
+  background: rgba(14, 20, 28, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roster-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  width: 75px;
+}
+
+.roster-label.red {
+  color: var(--team-red);
+}
+
+.roster-label.blue {
+  color: var(--team-blue);
+}
+
+.fly-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c0d0e0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fly-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.fly-btn.red.active {
+  background: var(--team-red);
+  border-color: #ff6677;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 51, 68, 0.6);
+}
+
+.fly-btn.blue.active {
+  background: var(--team-blue);
+  border-color: #33aaff;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 136, 255, 0.6);
+}
+
+.auto-track-btn {
+  margin-top: 4px;
+  background: rgba(216, 255, 0, 0.12);
+  border: 1px solid rgba(216, 255, 0, 0.35);
+  color: var(--neon-yellow);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.auto-track-btn:hover, .auto-track-btn.active {
+  background: var(--neon-yellow);
+  color: #0c1219;
+  box-shadow: 0 0 12px rgba(216, 255, 0, 0.5);
+}
+
+/* Biometric Meters & Pulse Dot */
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px #00ff88; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.nervous-bar-track, .stat-bar-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 3px 0 2px 0;
+}
+
+.nervous-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #d8ff00, #ff3344);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: #00d8ff;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.stat-num.neon-yellow {
+  color: var(--neon-yellow);
+}
+

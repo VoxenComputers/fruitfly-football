@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5v5 Fly Football Championship - Team Red vs Team Blue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Three.js + Controls + GLTFLoader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Top Broadcast Scoreboard -->
+  <header class="top-scoreboard">
+    <div class="team-block red-team">
+      <span class="team-badge red">RED</span>
+      <span class="team-name">Team Red</span>
+      <span class="team-score" id="score-red">0</span>
+    </div>
+
+    <div class="match-info">
+      <span class="match-clock" id="match-time">00:00</span>
+      <span class="match-stage">Drosophila Connectome Cup &bull; 5 v 5</span>
+    </div>
+
+    <div class="team-block blue-team">
+      <span class="team-score" id="score-blue">0</span>
+      <span class="team-name">Team Blue</span>
+      <span class="team-badge blue">BLUE</span>
+    </div>
+  </header>
+
+  <!-- Camera & Match Controls (Top Right) -->
+  <div class="top-controls">
+    <button class="cam-btn active" id="btn-cam-tv">Broadcast TV</button>
+    <button class="cam-btn" id="btn-cam-ball">Ball Cam</button>
+    <button class="cam-btn" id="btn-cam-fly">Fly POV</button>
+    <button class="cam-btn" id="btn-cam-tactical">Top Down</button>
+    <button class="action-btn" id="btn-reset-ball">Reset Match</button>
+  </div>
+
+  <!-- Goal Celebration Flash Banner -->
+  <div class="goal-banner" id="goal-banner">
+    <h1 id="goal-text">GOAL!</h1>
+  </div>
+
+  <!-- Roster / Fly Selection Bar (Bottom Left) -->
+  <div class="roster-bar">
+    <div class="roster-row">
+      <span class="roster-label red">TEAM RED</span>
+      <button class="fly-btn red active" data-fly-id="RED_5">#5 ST</button>
+      <button class="fly-btn red" data-fly-id="RED_4">#4 MID</button>
+      <button class="fly-btn red" data-fly-id="RED_2">#2 DEF</button>
+      <button class="fly-btn red" data-fly-id="RED_3">#3 DEF</button>
+      <button class="fly-btn red" data-fly-id="RED_1">#1 GK</button>
+    </div>
+    <div class="roster-row">
+      <span class="roster-label blue">TEAM BLUE</span>
+      <button class="fly-btn blue" data-fly-id="BLUE_5">#5 ST</button>
+      <button class="fly-btn blue" data-fly-id="BLUE_4">#4 MID</button>
+      <button class="fly-btn blue" data-fly-id="BLUE_2">#2 DEF</button>
+      <button class="fly-btn blue" data-fly-id="BLUE_3">#3 DEF</button>
+      <button class="fly-btn blue" data-fly-id="BLUE_1">#1 GK</button>
+    </div>
+    <button class="auto-track-btn" id="btn-auto-track">AUTO: BALL TRACK</button>
+  </div>
+
+  <!-- Fly Biometrics & Neural Monitor Card (Bottom Right, Minimizable) -->
+  <div class="neural-activity-card hud-card" id="neural-card">
+    <div class="card-header hud-header">
+      <div class="header-tag">
+        <span class="card-title">FLY BIOMETRICS &amp; NEURAL MONITOR</span>
+        <span class="player-tag" id="active-player-name">TEAM RED #5 STRIKER</span>
+      </div>
+      <div class="header-controls">
+        <span class="pulse-dot" id="player-pulse-dot"></span>
+        <button class="minimize-toggle-btn" id="btn-minimize-stats" title="Minimize / Expand Stats Window">&#8722;</button>
+      </div>
+    </div>
+
+    <!-- Collapsible Card Body -->
+    <div class="card-collapsible-body" id="stats-card-body">
+      <!-- Biometric & Neural Metrics (Nervous Level, Wingbeats, Spikes, Stamina) -->
+      <div class="card-stats-grid">
+        <!-- Nervous / Arousal Level -->
+        <div class="stat-col">
+          <span class="stat-label">NERVOUS / AROUSAL</span>
+          <div class="stat-main">
+            <span class="stat-num neon-yellow" id="val-nervous">78</span>
+            <span class="stat-unit neon-yellow">%</span>
+          </div>
+          <div class="nervous-bar-track">
+            <div class="nervous-bar-fill" id="nervous-bar-fill" style="width: 78%;"></div>
+          </div>
+          <span class="stat-sub" id="val-nervous-state">HIGH ALERT</span>
+        </div>
+
+        <!-- Wingbeat Frequency -->
+        <div class="stat-col">
+          <span class="stat-label">WINGBEAT SPEED</span>
+          <div class="stat-main">
+            <span class="stat-num white" id="val-wingbeat">195</span>
+            <span class="stat-unit white">Hz</span>
+          </div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill" id="wingbeat-bar-fill" style="width: 82%;"></div>
+          </div>
+          <span class="stat-sub">Thoracic flight motor</span>
+        </div>
+
+        <!-- Neural Spike Rate -->
+        <div class="stat-col">
+          <span class="stat-label">FLY SPIKES</span>
+          <div class="stat-main">
+            <span class="stat-num white" id="val-spikes">58,240</span>
+          </div>
+          <span class="stat-sub">in 50 ms neural window</span>
+        </div>
+
+        <!-- Stamina & Energy Reserve -->
+        <div class="stat-col">
+          <span class="stat-label">STAMINA / ENERGY</span>
+          <div class="stat-main">
+            <span class="stat-num neon-green" id="val-stamina">92</span>
+            <span class="stat-unit neon-green">%</span>
+          </div>
+          <span class="stat-sub" id="val-optic-flow">Optic: Motion Forward</span>
+        </div>
+      </div>
+
+      <!-- Chart Header -->
+      <div class="chart-header">
+        <span class="chart-tag" id="chart-fly-label">NEURAL ACTION POTENTIALS (SELECTED FLY)</span>
+        <span class="chart-scale">SNN MEMBRANE Vm &bull; REAL-TIME</span>
+      </div>
+
+      <!-- Real-time Oscillating Waveform Canvas -->
+      <div class="waveform-wrap">
+        <canvas id="waveform-canvas" width="340" height="42"></canvas>
+      </div>
+
+      <!-- Ball Distance & Motor Vector -->
+      <div class="action-strip">
+        <span class="act-lbl">CONNECTOME INTENT:</span>
+        <span class="act-val" id="act-decision">ATTACKING BALL</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
